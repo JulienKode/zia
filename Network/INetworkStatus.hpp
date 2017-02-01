@@ -48,7 +48,7 @@ namespace apouche
          * @param connection The connection to add
          * @param mode The mode in which add the connection
          */
-        virtual void addConnection(IZiaConnection *connection, Treatment const &mode) = 0;
+        virtual apouche::IZiaConnection *addConnection(Treatment const &mode) = 0;
 
         /**
          * @brief Clear connections
