@@ -46,6 +46,7 @@ namespace apouche
          * @return Tell if the sent succeds. Return of (send, write, or anything)
          */
         virtual int SendResponse(IHttpResponse *response) = 0;
+        virtual int SendSSLResponse(IHttpResponse *response) = 0;
 
         /**
          * @brief Allow core to get the list of requests the connection received
@@ -58,6 +59,7 @@ namespace apouche
          * @return A new HttpRequest
          */
         virtual IHttpRequest    *getNextRequest() = 0;
+        virtual IHttpRequest    *getNextSSLRequest() = 0;
     };
 }
 
