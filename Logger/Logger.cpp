@@ -26,5 +26,6 @@ void apouche::Logger::warning(const std::string &message) {
 }
 
 void apouche::Logger::write(const std::string &message) {
+    std::lock_guard<std::mutex> l(_m);
     std::cerr << message << std::endl;
 }

@@ -13,7 +13,7 @@
  */
 
 #include <string>
-
+#include <mutex>
 /*! \namespace apouche
  *
  * namespace that contains all http component
@@ -24,6 +24,8 @@ namespace apouche {
     *
     */
     class Logger {
+    protected:
+                mutable std::mutex _m;
     public:
         /*!
         *  \brief Destructor

@@ -20,6 +20,7 @@
 #include <iostream>
 #include <typeinfo>
 #include "Event/Event.hpp"
+#include <mutex>
 
 /*! \namespace apouche
  *
@@ -43,6 +44,7 @@ namespace apouche {
     template <typename T = void()>
     class EventList {
     private:
+        mutable std::mutex _m;
         /*
         *  Sorting the set
         */
@@ -65,13 +67,17 @@ namespace apouche {
         *  Constructor of EventList
         */
         EventList(){
+            std::lock_guard<std::mutex> l(_m);
         };
         /*!
         *  \brief Destructor
         *
         *  Destructor of EventList
         */
-        ~EventList() {};
+        ~EventList() {
+            std::lock_guard<std::mutex> l(_m);
+        };
+
         /*!
         *  \brief Get the Event
         *
@@ -81,6 +87,7 @@ namespace apouche {
         *  \return Event<T, Args...>, Event
         */
         EventIterator getEvent(const std::string &name){
+            std::lock_guard<std::mutex> l(_m);
             return std::find_if(_event.begin(), _event.end(), [&name](Event<T> const &it) { return it.getName() == name; });
         }
         /*!
@@ -92,6 +99,7 @@ namespace apouche {
         *  \return Event<T, Args...>, Event
         */
         EventIterator getNextEvent() const{
+            std::lock_guard<std::mutex> l(_m);
             return _event.begin();
         }
         /*!
@@ -103,6 +111,7 @@ namespace apouche {
         *  \return Iterator the end of the set
         */
         EventIterator getEnd() const{
+            std::lock_guard<std::mutex> l(_m);
             return _event.end();
         }
         /*!
@@ -114,6 +123,7 @@ namespace apouche {
         *  \return void
         */
         void addEvent(const Event<T> &event){
+            std::lock_guard<std::mutex> l(_m);
             _event.insert(event);
         }
         /*!
@@ -125,6 +135,7 @@ namespace apouche {
         *  \return void
         */
         void addEvent(const std::string &name, const Weight &priority, const std::function<T> &fct) {
+            std::lock_guard<std::mutex> l(_m);
             _event.insert(Event<T>(name, priority, fct));
         }
         /*!
@@ -137,6 +148,7 @@ namespace apouche {
         * false if the key is not in the header
         */
         bool containsEvent(const std::string &name) const {
+            std::lock_guard<std::mutex> l(_m);
             return std::find_if(_event.begin(), _event.end(), [&name](Event<T> const &it) { return it.getName() == name; }) != _event.end();
         }
         /*!
@@ -149,6 +161,7 @@ namespace apouche {
         * false if the key is not in the header
         */
         bool containsEvent(const Event<T> &e) const {
+            std::lock_guard<std::mutex> l(_m);
             return std::find(_event.begin(), _event.end(), e) != _event.end();
         }
         /*!
@@ -160,6 +173,7 @@ namespace apouche {
         *  \return void
         */
         void removeEvent(const std::string &name) {
+            std::lock_guard<std::mutex> l(_m);
             _event.erase(std::remove_if(_event.begin(), _event.end(), [&name](Event<T> const &it) { return it.getName() == name; }), _event.end());
         }
         /*!
@@ -188,6 +202,7 @@ namespace apouche {
 #endif
         {
             auto &&it = getNextEvent();
+            std::lock_guard<std::mutex> l(_m);
             if (it == _event.end())
                 throw; //Todo: add exception ici;
             return it->getFunction()(args...);
@@ -202,6 +217,7 @@ namespace apouche {
         */
         template< class ...Args>
         void callAllEvent(const callback &fct, Args&&... args){
+            std::lock_guard<std::mutex> l(_m);
             for (auto &&it : _event) {
                 fct(it.getFunction()(args...));
             }
@@ -217,10 +233,10 @@ namespace apouche {
         */
         template< class ...Args>
         void callAllEvent(Args&&... args){
+            std::lock_guard<std::mutex> l(_m);
             for (auto &&it : _event) {
                 it.getFunction()(args...);
             }
-         //   _event.clear();
         }
         /*!
         *  \brief Clear all the Events
@@ -231,6 +247,7 @@ namespace apouche {
         */
         template< class ...Args>
         void clear(){
+            std::lock_guard<std::mutex> l(_m);
             _event.clear();
         }
     };

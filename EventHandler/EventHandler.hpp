@@ -32,6 +32,8 @@ namespace apouche {
     *
     */
     class EventHandler {
+    private:
+          mutable std::mutex _m;
     public:
         EventList<void(IHttpConf *, INetworkStatus *)> _onNetworkIO; // will handle network input/output operations
         EventList<void(IZiaConnection *, IHttpConf *)> _afterConnect;
@@ -48,7 +50,7 @@ namespace apouche {
          * Clear All EventLists
          */
         void clear() {
-            _onNetworkIO.clear();
+            std::lock_guard<std::mutex> l(_m);
             _afterConnect.clear();
             _requestReceived.clear();
             _beforeParsingRequest.clear();
